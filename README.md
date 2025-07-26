@@ -1,36 +1,121 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+🧩 Project Development Plan (Step-by-Step)
+🔰 PHASE 1: Setup & Core Infrastructure
+✅ Initialize Next.js App (JavaScript)
 
-## Getting Started
+Setup Tailwind CSS✅
 
-First, run the development server:
+Setup folder structure: /app, /lib, /models, /api, etc.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+✅ Connect MongoDB with Mongoose
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Create utils/db.js
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+Test the connection with a dummy API route
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+✅ Create User Model
 
-## Learn More
+Fields: email, password, handler, createdAt
 
-To learn more about Next.js, take a look at the following resources:
+Mongoose schema with validation
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+🔐 PHASE 2: Authentication System
+✅ Build Signup API
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Use Zod for input validation
 
-## Deploy on Vercel
+Hash password using bcrypt
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Save to DB
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Check for duplicate email/handler
+
+✅ Build Login API (Credentials)
+
+Compare password using bcrypt.compare
+
+Generate JWT
+
+Store in secure httpOnly cookie
+
+✅ Integrate NextAuth.js
+
+Add GitHub provider
+
+Add Credentials provider (custom)
+
+Use JWT session strategy
+
+In signIn() callback: create new user on first GitHub login
+
+✅ Protect Routes (Middleware)
+
+Create auth.js to verify JWT from cookie
+
+Redirect if unauthenticated
+
+📝 PHASE 3: Post System
+✅ Create Post Model
+
+Fields: title, content, author (ref to User), createdAt
+
+✅ Create API to Add New Post
+
+Only allow authenticated users
+
+Validate with Zod
+
+Save post with author = session.user.id
+
+✅ Create API to Get Posts by Handler
+
+Public route (no auth)
+
+GET /api/posts?handler=suman_raj
+
+Find user by handler → Get all posts by their _id
+
+✅ Create API to Edit/Delete Post
+
+Only allow if post.author == session.user.id
+
+Protect using middleware
+
+💻 PHASE 4: Frontend UI (Tailwind)
+✅ Create Register Page
+
+Form (email, password, handler)
+
+Call custom API route
+
+✅ Create Login Page
+
+Login with email/password or GitHub (NextAuth)
+
+✅ Create Dashboard Page
+
+Show only logged-in user’s posts
+
+Add buttons for create/edit/delete
+
+✅ Create Public Home Page
+
+Input to search handler
+
+Show only that user’s posts
+
+✅ Create Post Create/Edit Page
+
+Show form only for logged-in user
+
+Use fetch and handle submission
+
+🎁 PHASE 5: Extras & Polish
+✅ Add Post Timestamps (createdAt)
+
+✅ Add “No posts found” handling
+
+✅ Add loading states and errors
+
+✅ Optional: Add comments or likes
+
+✅ Optional: Add role-based access (Admin, Mod)
