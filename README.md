@@ -4,13 +4,13 @@
 
 Setup Tailwind CSS✅
 
-Setup folder structure: /app, /lib, /models, /api, etc.
+Setup folder structure: /app, /lib, /models, /api, etc.✅
 
 ✅ Connect MongoDB with Mongoose
 
-Create utils/db.js
+Create utils/db.js✅
 
-Test the connection with a dummy API route
+Test the connection with a dummy API route✅
 
 ✅ Create User Model
 
