@@ -14,7 +14,7 @@ Test the connection with a dummy API route✅
 
 ✅ Create User Model
 
-Fields: email, password, handler, createdAt
+Fields: email, password, handler, createdAt✅
 
 Mongoose schema with validation
 
