@@ -8,9 +8,9 @@ const userSchema = new mongoose.Schema(
     },
     handle: {
       type: String,
-      required: true,
       unique: true,
       sparse: true,
+      required: false,
     },
     email: {
       type: String,
@@ -19,6 +19,12 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
+      required: false,
+    },
+    provider: {
+      type: String,
+      enum: ["credentials", "github", "google"],
+      default: "credentials",
       required: true,
     },
   },

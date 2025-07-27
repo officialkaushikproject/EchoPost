@@ -2,7 +2,7 @@ import { connect } from "@/utils/db";
 import User from "@/model/User";
 import { NextResponse } from "next/server";
 import { userSchema } from "@/lib/zodSchema";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 
 export async function POST(request) {
   const data = await request.json();
