@@ -1,24 +1,81 @@
 "use client";
-import { useSession, signIn, signOut } from "next-auth/react";
 import Link from "next/link";
-// export default function Component() {
-//   const { data: session } = useSession()
-//   if(session) {
-//     return <>
-//       Signed in as {session.user.email} <br/>
-//       Signed in as {session.user.id} <br/>
-//       Signed in as {session.user.name} <br/>
-//       Signed in as {session.user.hasHandle} <br/>
-//       <button onClick={() => signOut()}>Sign out</button>
-//     </>
-//   }
-//   return <>
-//     Not signed in <br/>
-//     <button onClick={() => signIn()}>Sign in</button>
-//   </>
-// }
+import Toastify from "toastify-js";
+import { useSession, signIn, signOut } from "next-auth/react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 const page = () => {
+  const router = useRouter(); 
+  const [data, setdata] = useState({
+    email: "",
+    password: "",
+  });
+
+  const handleSubmit = async () => {
+    try {
+      const res = await signIn("credentials", {
+        redirect: false,
+        email: data.email,
+        password: data.password,
+      });
+
+      if (res && res.ok) {
+        Toastify({
+          text: "Login successful!",
+          style: {
+            background: "linear-gradient(to right, purple, black)",
+            color: "white",
+          },
+        }).showToast();
+        
+        // Add a small delay to ensure session is updated
+        setTimeout(() => {
+          router.push("/dashboard");
+        }, 100);
+      } else {
+        Toastify({
+          text: "Login failed. Check your credentials.",
+          style: {
+            background: "linear-gradient(to right, #8b0000, black)",
+            color: "white",
+          },
+        }).showToast();
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      Toastify({
+        text: "An error occurred during login.",
+        style: {
+          background: "linear-gradient(to right, #8b0000, black)",
+          color: "white",
+        },
+      }).showToast();
+    }
+  };
+
+  // Handle GitHub login specifically
+  const handleGitHubLogin = async () => {
+    try {
+      await signIn("github", {
+        callbackUrl: "/dashboard", // This ensures proper redirect after GitHub auth
+      });
+    } catch (error) {
+      console.error("GitHub login error:", error);
+    }
+  };
+
+  // Handle Google login specifically  
+  const handleGoogleLogin = async () => {
+    try {
+      await signIn("google", {
+        callbackUrl: "/dashboard",
+      });
+    } catch (error) {
+      console.error("Google login error:", error);
+    }
+  };
+
   return (
     <>
       <div className="min-h-screen bg-gradient-to-b from-black via-purple-950/50 to-black relative overflow-hidden flex items-center justify-center">
@@ -50,10 +107,16 @@ const page = () => {
                 <div className="flex items-center space-x-3">
                   <span className="text-white/60 text-sm">OR</span>
                   <div className="flex space-x-2">
-                    <button className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors border border-white/20">
-                      <img src="./pngegg.png" />
+                    <button
+                      onClick={handleGitHubLogin}
+                      className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors border border-white/20"
+                    >
+                      <img src="./pngegg.png" alt="GitHub" />
                     </button>
-                    <button className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors border border-white/20">
+                    <button
+                      onClick={handleGoogleLogin}
+                      className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors border border-white/20"
+                    >
                       <span className="text-white font-bold">G</span>
                     </button>
                   </div>
@@ -63,6 +126,11 @@ const page = () => {
               <div className="space-y-6">
                 <div>
                   <input
+                    name="email"
+                    value={data.email}
+                    onChange={(e) =>
+                      setdata({ ...data, [e.target.name]: e.target.value })
+                    }
                     type="email"
                     placeholder="Your Email"
                     className="w-full px-0 py-3 bg-transparent border-0 border-b border-white/30 text-white placeholder-white/60 focus:outline-none focus:border-green-400 transition-colors"
@@ -71,13 +139,21 @@ const page = () => {
 
                 <div>
                   <input
+                    name="password"
+                    value={data.password}
+                    onChange={(e) =>
+                      setdata({ ...data, [e.target.name]: e.target.value })
+                    }
                     type="password"
                     placeholder="Password"
                     className="w-full px-0 py-3 bg-transparent border-0 border-b border-white/30 text-white placeholder-white/60 focus:outline-none focus:border-green-400 transition-colors"
                   />
                 </div>
 
-                <button className="w-full py-4 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-colors mt-8">
+                <button
+                  onClick={handleSubmit}
+                  className="w-full py-4 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-colors mt-8"
+                >
                   Login
                 </button>
               </div>
@@ -87,9 +163,9 @@ const page = () => {
                   Don't have an account?
                 </span>
                 <Link href={"/register"}>
-                <button className="text-green-400 hover:text-green-300 ml-2 text-sm font-medium transition-colors">
-                  Register here
-                </button>
+                  <button className="text-green-400 hover:text-green-300 ml-2 text-sm font-medium transition-colors">
+                    Register here
+                  </button>
                 </Link>
               </div>
             </div>
