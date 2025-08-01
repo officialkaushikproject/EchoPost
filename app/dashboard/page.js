@@ -1,5 +1,8 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useSession, signOut } from "next-auth/react";
+import Loader from "@/component/Loader";
+import Toastify from "toastify-js";
 
 export default function ProfileDashboard() {
   const [activeTab, setActiveTab] = useState("profile");
@@ -11,50 +14,21 @@ export default function ProfileDashboard() {
   const [newPostTitle, setNewPostTitle] = useState("");
   const [newPostDescription, setNewPostDescription] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  // Sample posts data
-  const posts = [
-    {
-      id: 1,
-      title: "Latest Digital Art",
-      description:
-        "Just finished my latest digital art piece! Really excited to share this with everyone. 🎨✨",
-      time: "2h ago",
-      likes: 124,
-      comments: 23,
-      shares: 12,
-    },
-    {
-      id: 2,
-      title: "Sunset Photography",
-      description:
-        "Beautiful sunset today! Nature always inspires my creativity. 🌅📸",
-      time: "1d ago",
-      likes: 89,
-      comments: 15,
-      shares: 8,
-    },
-    {
-      id: 3,
-      title: "Secret Project",
-      description:
-        "Working on something special. Can't wait to reveal it soon! 🚀",
-      time: "3d ago",
-      likes: 156,
-      comments: 34,
-      shares: 19,
-    },
-    {
-      id: 4,
-      title: "Community Love",
-      description:
-        "Grateful for all the support from this amazing community! 🙏💜",
-      time: "1w ago",
-      likes: 203,
-      comments: 45,
-      shares: 27,
-    },
-  ];
+  const { data: session, status } = useSession();
+  const [posts, setPosts] = useState([]);
+  // Collect post
+  const fetchAllPost = async () => {
+    try {
+      const res = await fetch("/api/posts");
+      const posts = await res.json();
+      setPosts(posts);
+    } catch (error) {
+      console.log("Somthing wrong", error);
+    }
+  };
+  useEffect(() => {
+    fetchAllPost();
+  }, []);
 
   const handlePostClick = (post) => {
     setSelectedPost(post);
@@ -93,17 +67,52 @@ export default function ProfileDashboard() {
     setIsCreatingPost(true);
   };
 
-  const handleSaveNewPost = () => {
-    console.log("Creating new post:", {
-      title: newPostTitle,
-      description: newPostDescription,
-    });
+  const handleSaveNewPost = async () => {
+    const author = session.user.id;
+    try {
+      const res = await fetch("/api/posts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: newPostTitle,
+          description: newPostDescription,
+          author: author,
+        }),
+      });
+      const newPost = await res.json();
+      if (res.ok) {
+        Toastify({
+          text: res.message || "Post Shared!",
+          style: {
+            background: "linear-gradient(to right, purple, black)",
+            color: "white",
+          },
+        }).showToast();
+        fetchAllPost();
+      } else {
+        Toastify({
+          text: res.message || "Something Went Wrong",
+          style: {
+            background: "linear-gradient(to right, purple, black)",
+            color: "white",
+          },
+        }).showToast();
+      }
+    } catch (error) {
+      console.log("Somthing wrong", error);
+    }
     setIsCreatingPost(false);
     setNewPostTitle("");
     setNewPostDescription("");
   };
 
-  return (
+  return status === "loading" ? (
+    <div className="min-h-screen flex justify-center items-center">
+      <Loader />
+    </div>
+  ) : (
     <div className="min-h-screen bg-gradient-to-b from-black via-purple-950/50 to-black relative overflow-hidden">
       <style jsx>{`
         .custom-scrollbar::-webkit-scrollbar {
@@ -134,19 +143,29 @@ export default function ProfileDashboard() {
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold">
             <span className="bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
-              Kaushik Rajbongshi
+              {session.user.name}
             </span>
           </h1>
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="text-white p-2"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 6h16M4 12h16M4 18h16"
+              />
             </svg>
           </button>
         </div>
-        
+
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="absolute top-full left-0 right-0 bg-black/90 backdrop-blur-xl border-b border-white/20 p-4 space-y-2">
@@ -192,7 +211,7 @@ export default function ProfileDashboard() {
             <div className="hidden lg:block w-64 bg-black/20 border-r border-white/10 p-6">
               <h1 className="text-2xl font-bold mb-6 leading-tight">
                 <span className="bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
-                  Kaushik Rajbongshi
+                  {session.user.name}
                 </span>
               </h1>
               <div className="space-y-2">
@@ -225,29 +244,43 @@ export default function ProfileDashboard() {
                 /* Profile Content */
                 <div className="space-y-6 md:space-y-8">
                   <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
-                    <div className="w-20 h-20 md:w-24 md:h-24 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                      <span className="text-white font-bold text-xl md:text-2xl">U</span>
+                    <div className="w-20 h-20 md:w-24 md:h-24 bg-gradient-to-r from-purple-900 to rounded-full flex items-center justify-center">
+                      <span className="text-white font-bold text-xl md:text-2xl">
+                        {session?.user?.name?.charAt(0)}
+                      </span>
                     </div>
                     <div className="text-center sm:text-left">
                       <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
-                        @username
+                        @{session.user.handle}
                       </h2>
-                      <p className="text-white/70">John Doe</p>
+                      <p className="text-white/70">{session.user.name}</p>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-3 gap-4 md:gap-8">
                     <div className="text-center">
-                      <div className="text-xl md:text-2xl font-bold text-white">24</div>
-                      <div className="text-white/60 text-xs md:text-sm">Posts</div>
+                      <div className="text-xl md:text-2xl font-bold text-white">
+                        24
+                      </div>
+                      <div className="text-white/60 text-xs md:text-sm">
+                        Posts
+                      </div>
                     </div>
                     <div className="text-center">
-                      <div className="text-xl md:text-2xl font-bold text-white">1.2K</div>
-                      <div className="text-white/60 text-xs md:text-sm">Followers</div>
+                      <div className="text-xl md:text-2xl font-bold text-white">
+                        1.2K
+                      </div>
+                      <div className="text-white/60 text-xs md:text-sm">
+                        Followers
+                      </div>
                     </div>
                     <div className="text-center">
-                      <div className="text-xl md:text-2xl font-bold text-white">856</div>
-                      <div className="text-white/60 text-xs md:text-sm">Following</div>
+                      <div className="text-xl md:text-2xl font-bold text-white">
+                        856
+                      </div>
+                      <div className="text-white/60 text-xs md:text-sm">
+                        Following
+                      </div>
                     </div>
                   </div>
 
@@ -273,6 +306,7 @@ export default function ProfileDashboard() {
                     </div>
                   </div>
                   <button
+                    onClick={() => signOut({ callbackUrl: "/" })}
                     type="button"
                     className="text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center w-full sm:w-auto"
                   >
@@ -283,7 +317,9 @@ export default function ProfileDashboard() {
                 /* Posts Content */
                 <div className="h-full flex flex-col">
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 space-y-4 sm:space-y-0">
-                    <h2 className="text-xl md:text-2xl font-bold text-white">My Posts</h2>
+                    <h2 className="text-xl md:text-2xl font-bold text-white">
+                      My Posts
+                    </h2>
                     <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto">
                       <button
                         onClick={handleCreatePost}
@@ -306,7 +342,7 @@ export default function ProfileDashboard() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       {posts.map((post, index) => (
                         <div
-                          key={post.id}
+                          key={index}
                           onClick={() => handlePostClick(post)}
                           className={`${
                             index % 4 === 0
@@ -318,31 +354,26 @@ export default function ProfileDashboard() {
                               : "bg-gradient-to-br from-purple-800/30 to-pink-800/20"
                           } backdrop-blur-xl border border-white/20 rounded-xl p-4 md:p-6 shadow-xl cursor-pointer hover:scale-105 transition-transform duration-300`}
                         >
-                          <div className="flex items-center space-x-3 mb-4">
-                            <div className="w-6 h-6 md:w-8 md:h-8 bg-gradient-to-r from-pink-400 to-purple-400 rounded-full"></div>
-                            <div className="text-white text-xs md:text-sm font-medium">
-                              @username
+                          {/* Title Row with Border Bottom */}
+                          <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-2">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-6 h-6 md:w-8 md:h-8 bg-gradient-to-r from-purple-800 to-black rounded-full flex justify-center items-center">
+                                <span>{session?.user?.name?.charAt(0)}</span>
+                              </div>
+                              <div className="text-sm md:text-base font-semibold bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-pink-300">
+                                {post.title}
+                              </div>
                             </div>
+
+                            {/* Optional: Timestamp or Meta Info */}
                             <div className="text-white/40 text-xs">
                               {post.time}
                             </div>
                           </div>
-                          <div className="text-white/90 mb-4 text-sm md:text-base">
+
+                          {/* Description */}
+                          <div className="text-white/90 text-sm md:text-base">
                             {post.description}
-                          </div>
-                          <div className="flex items-center space-x-4 text-white/60 text-xs md:text-sm">
-                            <div className="flex items-center space-x-1">
-                              <span>♥</span>
-                              <span>{post.likes}</span>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              <span>💬</span>
-                              <span>{post.comments}</span>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              <span>↗</span>
-                              <span>{post.shares}</span>
-                            </div>
                           </div>
                         </div>
                       ))}
@@ -387,6 +418,7 @@ export default function ProfileDashboard() {
                       type="text"
                       value={newPostTitle}
                       onChange={(e) => setNewPostTitle(e.target.value)}
+                      name="title"
                       className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm md:text-base"
                       placeholder="Enter post title..."
                     />
@@ -400,6 +432,7 @@ export default function ProfileDashboard() {
                       value={newPostDescription}
                       onChange={(e) => setNewPostDescription(e.target.value)}
                       rows={6}
+                      name="description"
                       className="custom-scrollbar w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none text-sm md:text-base"
                       placeholder="Enter post description..."
                     />

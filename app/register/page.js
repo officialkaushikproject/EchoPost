@@ -1,10 +1,10 @@
 "use client";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
+import Toastify from "toastify-js";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { userSchema } from "@/lib/zodSchema";
-import Toastify from "toastify-js";
 import { signIn } from "next-auth/react";
 
 const page = () => {
@@ -37,8 +37,6 @@ const page = () => {
           color: "white",
         },
       }).showToast();
-
-      console.log("Register");
       reset();
     } else {
       Toastify({

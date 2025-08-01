@@ -5,16 +5,6 @@ export default withAuth(
   function middleware(req) {
     const token = req.nextauth.token;
     const { pathname } = req.nextUrl;
-
-    // Add debugging
-    console.log("Middleware Debug:", {
-      pathname,
-      hasToken: !!token,
-      hasHandle: token?.hasHandle,
-      tokenId: token?.id,
-      userEmail: token?.email,
-    });
-
     // Skip middleware for API routes, static files, and auth pages
     if (
       pathname.startsWith("/api/") ||

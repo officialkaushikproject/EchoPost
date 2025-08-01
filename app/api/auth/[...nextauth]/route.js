@@ -89,12 +89,14 @@ export const authOptions = {
           token.id = dbUser._id.toString();
           token.email = dbUser.email;
           token.name = dbUser.name;
+          token.handle = dbUser.handle;
           token.provider = dbUser.provider;
           token.hasHandle = !!dbUser.handle; // Check if handle exists
         } else {
           token.id = user.id;
           token.email = user.email;
           token.name = user.name;
+          token.handle = user.handle;
           token.provider = user.provider;
           token.hasHandle = !!user.handle;
         }
@@ -117,6 +119,7 @@ export const authOptions = {
       session.user.id = token.id;
       session.user.name = token.name;
       session.user.email = token.email;
+      session.user.handle = token.handle;
       session.user.provider = token.provider;
       session.user.hasHandle = token.hasHandle;
       return session;
