@@ -3,85 +3,80 @@ import { NextResponse } from "next/server";
 
 export default withAuth(
   function middleware(req) {
+    console.log("🚀 MIDDLEWARE RUNNING!");
+    console.log("🚀 Pathname:", req.nextUrl.pathname);
+    
     const token = req.nextauth.token;
     const { pathname } = req.nextUrl;
-    // Skip middleware for API routes, static files, and auth pages
+
+    console.log("🚀 Token exists:", !!token);
+    console.log("🚀 Token hasHandle:", token?.hasHandle);
+
+    // Skip middleware for these paths
     if (
       pathname.startsWith("/api/") ||
       pathname.startsWith("/_next/") ||
-      pathname.startsWith("/auth/") ||
       pathname === "/favicon.ico" ||
-      pathname.includes(".")  // Skip all static files
+      pathname.includes(".") ||
+      pathname === "/" ||
+      pathname === "/login" ||
+      pathname === "/register" ||
+      pathname === "/about" ||
+      pathname === "/contact"
     ) {
+      console.log("🚀 Skipping middleware for:", pathname);
       return NextResponse.next();
     }
 
-    // Public pages that don't require authentication
-    const publicPages = ["/", "/login", "/register", "/about", "/contact"];
-    if (publicPages.includes(pathname)) {
+    // Check for dynamic routes - now they're in /handler/[id] format
+    const isDynamicRoute = /^\/handler\/[a-zA-Z0-9_-]+$/.test(pathname);
+    if (isDynamicRoute) {
+      console.log("🚀 Dynamic route detected:", pathname);
       return NextResponse.next();
     }
 
     // If no token, redirect to login
     if (!token) {
-      console.log("No token, redirecting to login");
+      console.log("🚀 No token found, redirecting to login");
       return NextResponse.redirect(new URL("/login", req.url));
     }
 
-    // If user is authenticated but doesn't have a handle
-    if (token && token.hasHandle === false) {
-      console.log("User has no handle, redirecting to /set-handle");
-      if (pathname !== "/set-handle") {
-        return NextResponse.redirect(new URL("/set-handle", req.url));
-      }
-      // Allow access to set-handle page
-      return NextResponse.next();
+    // Check handle status
+    const hasHandle = token.hasHandle === true;
+    console.log("🚀 User hasHandle:", hasHandle);
+    console.log("🚀 User handle:", token.handle);
+
+    // If user doesn't have handle and trying to access protected route
+    if (!hasHandle && pathname !== "/set-handle") {
+      console.log("🚀 User needs handle, redirecting to /set-handle");
+      return NextResponse.redirect(new URL("/set-handle", req.url));
     }
 
-    // If user has handle but is trying to access set-handle page
-    if (token && token.hasHandle === true && pathname === "/set-handle") {
-      console.log("User has handle, redirecting away from /set-handle");
+    // If user has handle but trying to access set-handle page
+    if (hasHandle && pathname === "/set-handle") {
+      console.log("🚀 User has handle, redirecting to dashboard");
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
 
-    // If user has handle, allow access to protected routes
-    if (token && token.hasHandle === true) {
-      return NextResponse.next();
-    }
-
-    // Default: if hasHandle is undefined/null, redirect to set-handle
-    if (token && (token.hasHandle === undefined || token.hasHandle === null)) {
-      console.log("Handle status unknown, redirecting to /set-handle");
-      if (pathname !== "/set-handle") {
-        return NextResponse.redirect(new URL("/set-handle", req.url));
-      }
-      return NextResponse.next();
-    }
-
+    console.log("🚀 Allowing access to:", pathname);
     return NextResponse.next();
   },
   {
-    pages: {
-      signIn: "/login",
-    },
     callbacks: {
-      authorized: ({ token, req }) => {
-        const { pathname } = req.nextUrl;
-        const publicPages = ["/", "/login", "/register", "/about", "/contact"];
-
-        // Always allow access to public pages
-        if (publicPages.includes(pathname)) {
-          return true;
-        }
-
-        // Always allow access to set-handle page if user is authenticated
-        if (pathname === "/set-handle" && token) {
-          return true;
-        }
-
-        // For other protected routes, require authentication
-        return !!token;
-      },
+      authorized: () => true // Let the middleware function handle all logic
     },
   }
 );
+
+export const config = {
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)  
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+  ],
+};
