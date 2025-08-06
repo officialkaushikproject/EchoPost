@@ -1,69 +1,77 @@
-import React from "react";
+"use client";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function GlassmorphismHero() {
+  const [handle, setHandle] = useState("");
+  const [suggestion, setSuggestion] = useState([]);
+  const router = useRouter();
+
+  useEffect(() => {
+    const delayDebounce = setTimeout(async () => {
+      if (handle.length > 0) {
+        try {
+          const res = await fetch(`/api/search-handle?query=${handle}`);
+          const suggestion_handle = await res.json();
+          setSuggestion(suggestion_handle);
+        } catch (err) {
+          console.error("Suggestion fetch error:", err);
+          setSuggestion([]);
+        }
+      } else {
+        setSuggestion([]);
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounce);
+  }, [handle]);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-black via-purple-950/50 to-black relative overflow-hidden">
-      {/* Animated Background Elements */}
+      {/* Background */}
       <div className="absolute inset-0">
         <div className="absolute top-20 left-10 w-40 h-40 bg-purple-600/10 rounded-full blur-2xl animate-pulse"></div>
         <div className="absolute top-60 right-20 w-60 h-60 bg-purple-500/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
         <div className="absolute bottom-40 left-1/3 w-50 h-50 bg-violet-600/8 rounded-full blur-2xl animate-pulse delay-2000"></div>
       </div>
 
-      {/* Navigation - Updated to match image */}
+      {/* Navigation */}
       <nav className="relative z-50 flex justify-between items-center px-8 py-6">
         <div className="flex items-center space-x-2">
-          <div className="w-15 h-12   flex items-center justify-center border border-purple-400/30">
+          <div className="w-15 h-12 flex items-center justify-center border border-purple-400/30">
             <span className="text-purple-500 font-bold text-xl">E</span>
             <span className="text-white font-bold text-xl">cho</span>
             <span className="text-purple-500 font-bold text-xl">P</span>
             <span className="text-white font-bold text-xl">ost</span>
           </div>
         </div>
-
         <div className="hidden md:flex items-center space-x-8">
-          <div className="relative group">
-            <button className="text-gray-400 hover:text-white transition-colors flex items-center space-x-1 text-sm">
-              <span>Features</span>
-              <span className="text-xs">▼</span>
-            </button>
-          </div>
-          <a
-            href="#"
-            className="text-gray-400 hover:text-white transition-colors text-sm"
-          >
+          <button className="text-gray-400 hover:text-white text-sm">
+            Features
+          </button>
+          <a href="#" className="text-gray-400 hover:text-white text-sm">
             Developers
           </a>
-          <div className="relative group">
-            <button className="text-gray-400 hover:text-white transition-colors flex items-center space-x-1 text-sm">
-              <span>Company</span>
-              <span className="text-xs">▼</span>
-            </button>
-          </div>
-          <a
-            href="#"
-            className="text-gray-400 hover:text-white transition-colors text-sm"
-          >
+          <button className="text-gray-400 hover:text-white text-sm">
+            Company
+          </button>
+          <a href="#" className="text-gray-400 hover:text-white text-sm">
             About Us
           </a>
-          <a
-            href="#"
-            className="text-gray-400 hover:text-white transition-colors text-sm"
-          >
-            Contect Us
+          <a href="#" className="text-gray-400 hover:text-white text-sm">
+            Contact Us
           </a>
         </div>
-        <Link href={"/login"}>
+        <Link href="/login">
           <button className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2.5 rounded-xl text-sm font-medium transition-colors">
             Login
           </button>
         </Link>
       </nav>
 
-      {/* HERO SECTION */}
+      {/* Hero Section */}
       <div className="relative z-10 flex items-center justify-between px-8 py-15 max-w-7xl mx-auto">
-        {/* Left Content */}
         <div className="flex-1 max-w-2xl">
           <div className="mb-8">
             <h1 className="text-6xl md:text-7xl font-bold text-white mb-6 leading-tight">
@@ -81,16 +89,41 @@ export default function GlassmorphismHero() {
               the world through our interactive platform
             </p>
 
-            {/* Email Input Section - Added to match image */}
+            {/* Input */}
             <div className="relative max-w-md mb-8">
               <input
-                type="email"
+                value={handle}
+                onChange={(e) => setHandle(e.target.value)}
                 placeholder="Enter Handle"
                 className="w-full px-4 py-3 pr-32 bg-black/40 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 backdrop-blur-sm"
               />
-              <button className="absolute right-2 top-1/2 transform -translate-y-1/2 px-4 py-2 bg-purple-500 text-white font-medium rounded-lg hover:bg-purple-600 transition-colors text-sm">
-                Search Post
+              <button
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 px-4 py-2 bg-purple-500 text-white font-medium rounded-lg hover:bg-purple-600 transition-colors text-sm"
+              >
+                Get Started
               </button>
+
+              {/* Suggestion Dropdown */}
+              {suggestion.length > 0 && (
+                <div className="absolute z-20 mt-2 w-full rounded-xl bg-black/80 backdrop-blur-md border border-purple-500 shadow-lg overflow-hidden">
+                  {suggestion.map((user, index) => (
+                    <div
+                      key={user._id}
+                      onClick={() => router.push(`/handler/${user._id}`)}
+                      className={`px-5 py-3 text-white hover:bg-purple-600/30 border-b border-white/10 last:border-b-0 cursor-pointer transition-all duration-200 ${
+                        index === 0
+                          ? "rounded-t-xl"
+                          : index === suggestion.length - 1
+                          ? "rounded-b-xl"
+                          : ""
+                      }`}
+                    >
+                      <span className="text-purple-400 font-medium">@</span>
+                      {user.handle}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
