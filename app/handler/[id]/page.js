@@ -69,7 +69,7 @@ export default function ProfileDashboard() {
           <div className="flex flex-col lg:flex-row h-[calc(100vh-4rem)] lg:h-[92vh]">
             {/* Left Sidebar - Desktop Only */}
             <div className="hidden lg:flex w-64 bg-black/20 border-r border-white/10 p-6 flex-col justify-center relative">
-              <Link href={"/"} >
+              <Link href={"/"}>
                 <button className="absolute top-7 left-8 text-[#d5b2f1] hover:text-[#26093d] transition-colors text-3xl font-bold">
                   &lt;
                 </button>
@@ -137,53 +137,66 @@ export default function ProfileDashboard() {
               {/* Scrollable Posts Container */}
               <div className="flex-1 overflow-hidden">
                 <div className="h-full overflow-y-auto custom-scrollbar p-4 md:p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                    {posts.map((posts, index) => (
-                      <div
-                        key={index}
-                        className={`${
-                          index % 4 === 0
-                            ? "bg-gradient-to-br from-slate-800/40 to-purple-800/40"
-                            : index % 4 === 1
-                            ? "bg-gradient-to-br from-slate-700/30 to-indigo-700/30"
-                            : index % 4 === 2
-                            ? "bg-gradient-to-br from-gray-800/20 to-purple-800/20"
-                            : "bg-gradient-to-br from-purple-800/30 to-pink-800/20"
-                        } backdrop-blur-xl border border-white/20 rounded-xl p-4 md:p-6 shadow-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl`}
-                      >
-                        <div className="flex items-center space-x-3 mb-4">
-                          <div className="w-6 h-6 md:w-8 md:h-8 bg-gradient-to-r from-pink-400 to-purple-400 rounded-full flex items-center justify-center">
-                            <span className="text-white font-bold text-xs md:text-sm">
-                              {userinfo.name.charAt(0)}
-                            </span>
+                  {posts.length === 0 ? (
+                    <div className="h-full flex justify-center items-center flex-col overflow-y-auto custom-scrollbar p-4 md:p-6">
+                      <h2 className="text-white text-2xl font-bold">
+                        No Post Yet
+                      </h2>
+                      <Link href="/">
+                        <button className="mt-4 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg font-medium transition-all">
+                          Home
+                        </button>
+                      </Link>
+                    </div>
+                  ) : (
+                    posts.map((posts, index) => (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                        <div
+                          key={index}
+                          className={`${
+                            index % 4 === 0
+                              ? "bg-gradient-to-br from-slate-800/40 to-purple-800/40"
+                              : index % 4 === 1
+                              ? "bg-gradient-to-br from-slate-700/30 to-indigo-700/30"
+                              : index % 4 === 2
+                              ? "bg-gradient-to-br from-gray-800/20 to-purple-800/20"
+                              : "bg-gradient-to-br from-purple-800/30 to-pink-800/20"
+                          } backdrop-blur-xl border border-white/20 rounded-xl p-4 md:p-6 shadow-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl`}
+                        >
+                          <div className="flex items-center space-x-3 mb-4">
+                            <div className="w-6 h-6 md:w-8 md:h-8 bg-gradient-to-r from-pink-400 to-purple-400 rounded-full flex items-center justify-center">
+                              <span className="text-white font-bold text-xs md:text-sm">
+                                {userinfo.name.charAt(0)}
+                              </span>
+                            </div>
+                            <div className="text-white text-xs md:text-sm font-medium">
+                              @{userinfo.handle}
+                            </div>
                           </div>
-                          <div className="text-white text-xs md:text-sm font-medium">
-                            @{userinfo.handle}
-                          </div>
-                        </div>
 
-                        <div className="text-white font-semibold mb-2 text-sm md:text-base">
-                          {posts.title}
-                        </div>
-
-                        <div className="text-white/90 mb-4 text-sm md:text-base leading-relaxed">
-                          {posts.description}
-                        </div>
-
-                        <div className="flex items-center space-x-6 text-white/60 text-xs md:text-sm">
-                          <div className="flex items-center space-x-1 hover:text-red-400 transition-colors cursor-pointer">
-                            <span>♥</span>
+                          <div className="text-white font-semibold mb-2 text-sm md:text-base">
+                            {posts.title}
                           </div>
-                          <div className="flex items-center space-x-1 hover:text-blue-400 transition-colors cursor-pointer">
-                            <span>💬</span>
+
+                          <div className="text-white/90 mb-4 text-sm md:text-base leading-relaxed">
+                            {posts.description}
                           </div>
-                          <div className="flex items-center space-x-1 hover:text-green-400 transition-colors cursor-pointer">
-                            <span>↗</span>
+
+                          <div className="flex items-center space-x-6 text-white/60 text-xs md:text-sm">
+                            <div className="flex items-center space-x-1 hover:text-red-400 transition-colors cursor-pointer">
+                              <span>♥</span>
+                            </div>
+                            <div className="flex items-center space-x-1 hover:text-blue-400 transition-colors cursor-pointer">
+                              <span>💬</span>
+                            </div>
+                            <div className="flex items-center space-x-1 hover:text-green-400 transition-colors cursor-pointer">
+                              <span>↗</span>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    ))}
-                  </div>
+                    ))
+                  )}
                 </div>
               </div>
             </div>
