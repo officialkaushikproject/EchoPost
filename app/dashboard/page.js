@@ -16,6 +16,7 @@ export default function ProfileDashboard() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { data: session, status } = useSession();
   const [posts, setPosts] = useState([]);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   // Collect post
   const fetchAllPost = async () => {
     try {
@@ -41,19 +42,6 @@ export default function ProfileDashboard() {
     setIsEditing(true);
   };
 
-  const handleSave = () => {
-    console.log("Saving changes:", {
-      title: editedTitle,
-      description: editedDescription,
-    });
-    setIsEditing(false);
-    setSelectedPost(null);
-  };
-
-  const handleDelete = () => {
-    console.log("Deleting post:", selectedPost.id);
-    setSelectedPost(null);
-  };
 
   const handleClosePopup = () => {
     setSelectedPost(null);
@@ -106,6 +94,87 @@ export default function ProfileDashboard() {
     setIsCreatingPost(false);
     setNewPostTitle("");
     setNewPostDescription("");
+  };
+
+  // Confirm delete popup → actual deletion
+  const confirmDeletePost = async () => {
+    try {
+      const res = await fetch(`/api/posts/${selectedPost._id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        Toastify({
+          text: "Post Deleted Successfully!",
+          style: {
+            background: "linear-gradient(to right, purple, black)",
+            color: "white",
+          },
+        }).showToast();
+
+        fetchAllPost();
+        setSelectedPost(null);
+      } else {
+        throw new Error(data.message || "Delete failed");
+      }
+    } catch (error) {
+      console.error("Delete error:", error);
+      Toastify({
+        text: error.message,
+        style: {
+          background: "linear-gradient(to right, red, black)",
+          color: "white",
+        },
+      }).showToast();
+    } finally {
+      setShowDeleteConfirm(false);
+    }
+  };
+
+  // Show delete confirm popup
+  const handleDelete = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  // For edit
+  const handleSave = async () => {
+    try {
+      const res = await fetch(`/api/posts/${selectedPost._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: editedTitle,
+          description: editedDescription,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        Toastify({
+          text: "Post Updated Successfully!",
+          style: {
+            background: "linear-gradient(to right, purple, black)",
+            color: "white",
+          },
+        }).showToast();
+        fetchAllPost();
+        setIsEditing(false);
+        setSelectedPost(null);
+      } else {
+        throw new Error(data.message || "Update failed");
+      }
+    } catch (error) {
+      console.error("Update error:", error);
+      Toastify({
+        text: error.message,
+        style: {
+          background: "linear-gradient(to right, red, black)",
+          color: "white",
+        },
+      }).showToast();
+    }
   };
 
   return status === "loading" ? (
@@ -550,9 +619,41 @@ export default function ProfileDashboard() {
           </div>
         </div>
       )}
-
       {/* Bottom Gradient Overlay */}
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8">
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowDeleteConfirm(false)}
+          ></div>
+
+          <div className="relative bg-gradient-to-br from-purple-900/90 to-black/90 text-white p-6 rounded-2xl max-w-md w-full shadow-xl border border-white/20">
+            <h3 className="text-lg font-semibold mb-4 text-white/90">
+              Confirm Delete
+            </h3>
+            <p className="text-sm text-white/70 mb-6">
+              Are you sure you want to delete this post? This action cannot be
+              undone.
+            </p>
+
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-sm text-white/80"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDeletePost}
+                className="px-4 py-2 rounded-lg bg-gradient-to-r from-red-500 via-red-600 to-red-700 hover:brightness-110 text-sm text-white"
+              >
+                Yes, Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
