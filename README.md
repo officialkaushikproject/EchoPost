@@ -1,121 +1,115 @@
-🧩 Project Development Plan (Step-by-Step)
-🔰 PHASE 1: Setup & Core Infrastructure
-✅ Initialize Next.js App (JavaScript)
+🚀 EchoPost(A Post Sharing Platfrom )
+--------------------------------
 
-Setup Tailwind CSS✅
+**Echo Post**
+Echo Post: A Next.js A Post Sharing Platfrom with high level security intregration
 
-Setup folder structure: /app, /lib, /models, /api, etc.✅
 
-✅ Connect MongoDB with Mongoose
 
-Create utils/db.js✅
+📖 Description
+--------------
 
-Test the connection with a dummy API route✅
+Echo Post is a Next.js authentication system that utilizes Zod for schema validation. It provides a robust and secure way to manage user authentication, allowing you to focus on building your application without worrying about the underlying authentication logic. With Echo Post, you can easily integrate Google, GitHub, and custom OAuth providers, as well as handle user sessions and authentication flows.
 
-✅ Create User Model
+✨ **Features**
 
-Fields: email, password, handler, createdAt✅
+1. 📝 User Sign-up and Login
+2. 🔒 Password Hashing and Verification
+3. 🕒 Session Management
+4. 🔑 Toastify Notifications
+5. 📊 Custom Database Connection
+6. 🛠️ Zod Schema Validation
+7. 🔒 OAuth Authentication (GitHub and Google)
+8. 📊 Profile Management
+9. 🔍 Search Functionality
+10. 📊 Error Handling and Logging
 
-Mongoose schema with validation
+🧰 Tech Stack Table
+--------------------
 
-🔐 PHASE 2: Authentication System
-✅ Build Signup API
+| Component | Version |
+| --- | --- |
+| Next.js | 12.2.0 |
+| Zod | 3.8.0 |
+| React | 17.0.2 |
+| Node.js | 16.13.0 |
+| bcrypt | 5.1.0 |
+| tailwindcss | 3.0.3 |
+| toastify-js | 2.2.0 |
+| react-hook-form | 7.23.2 |
+| @hookform/resolvers | 1.6.5 |
 
-Use Zod for input validation
+📁 Project Structure
+------------------
 
-Hash password using bcrypt
+* `components/`: reusable React components
+* `lib/`: utility libraries and helpers
+* `models/`: database models
+* `pages/`: Next.js pages and routes
+* `public/`: static assets
+* `styles/`: global CSS styles
+* `utils/`: utility functions and services
 
-Save to DB
+⚙️ How to Run
+-------------
 
-Check for duplicate email/handler
+### Setup
 
-✅ Build Login API (Credentials)
+1. Clone the repository: `git clone https://github.com/officialkaushikproject/EchoPost.git`
+2. Install dependencies: `npm install` or `yarn install`
+3. Start the development server: `npm run dev` or `yarn dev`
 
-Compare password using bcrypt.compare
+### Environment
 
-Generate JWT
+* `NEXTAUTH_URL`: the URL of your Next.js application
+* `NEXTAUTH_SECRET`: a secret key for authentication
+* `ZOD_SCHEMA`: the Zod schema for user validation
 
-Store in secure httpOnly cookie
+### Build
 
-✅ Integrate NextAuth.js
+* `npm run build` or `yarn build` to build the application
+* `npm run start` or `yarn start` to start the production server
 
-Add GitHub provider
+### Deploy
 
-Add Credentials provider (custom)
+* Deploy the application to your preferred hosting platform (e.g., Vercel, Netlify, etc.)
 
-Use JWT session strategy
+🧪 Testing Instructions
+-------------------------
 
-In signIn() callback: create new user on first GitHub login
+### Unit Tests
 
-✅ Protect Routes (Middleware)
+* Run `npm run test` or `yarn test` to execute unit tests
+* Write unit tests for each component and utility function
 
-Create auth.js to verify JWT from cookie
+### Integration Tests
 
-Redirect if unauthenticated
+* Run `npm run test-integration` or `yarn test-integration` to execute integration tests
+* Write integration tests for the authentication flow and API endpoints
 
-📝 PHASE 3: Post System
-✅ Create Post Model
 
-Fields: title, content, author (ref to User), createdAt
 
-✅ Create API to Add New Post
+📦 API Reference
+----------------
 
-Only allow authenticated users
+### User Schema
 
-Validate with Zod
+* `userSchema`: the Zod schema for user validation
 
-Save post with author = session.user.id
+### Authentication API
 
-✅ Create API to Get Posts by Handler
+* `POST /auth`: authenticate a user
+* `GET /auth/session`: retrieve the current user session
+* `DELETE /auth/session`: invalidate the current user session
 
-Public route (no auth)
+### User API
 
-GET /api/posts?handler=suman_raj
+* `GET /users`: retrieve a list of users
+* `GET /users/:id`: retrieve a single user
+* `POST /users`: create a new user
 
-Find user by handler → Get all posts by their _id
+👤 Author
+---------
 
-✅ Create API to Edit/Delete Post
+* **My Name**: Kaushik Rajbongshi (kaushikraj0241@gmail.com)
 
-Only allow if post.author == session.user.id
-
-Protect using middleware
-
-💻 PHASE 4: Frontend UI (Tailwind)
-✅ Create Register Page
-
-Form (email, password, handler)
-
-Call custom API route
-
-✅ Create Login Page
-
-Login with email/password or GitHub (NextAuth)
-
-✅ Create Dashboard Page
-
-Show only logged-in user’s posts
-
-Add buttons for create/edit/delete
-
-✅ Create Public Home Page
-
-Input to search handler
-
-Show only that user’s posts
-
-✅ Create Post Create/Edit Page
-
-Show form only for logged-in user
-
-Use fetch and handle submission
-
-🎁 PHASE 5: Extras & Polish
-✅ Add Post Timestamps (createdAt)
-
-✅ Add “No posts found” handling
-
-✅ Add loading states and errors
-
-✅ Optional: Add comments or likes
-
-✅ Optional: Add role-based access (Admin, Mod)
